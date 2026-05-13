@@ -40,7 +40,19 @@ npm run preview
 
 ## Editing Content In Obsidian
 
-Open `src/content/` as an Obsidian vault.
+Open the project root as the Obsidian vault:
+
+```txt
+<project-root>
+```
+
+In this project, the root is the folder that contains `package.json`, `.git/`, `src/`, and `.github/`. This lets the Obsidian Git plugin see the repository root. Do not open only `src/content/` if you want Obsidian Git to commit and push correctly.
+
+For normal website editing, only change Markdown or MDX files inside:
+
+```txt
+src/content/
+```
 
 Each folder inside `src/content/` is an Astro content collection:
 
@@ -55,6 +67,43 @@ There is also a templates folder:
 - `src/content/_templates/`
 
 Normal updates should be made by editing Markdown or MDX files in these folders. You should not need to touch Astro components for ordinary content changes.
+
+Recommended Obsidian workflow:
+
+1. Open the whole project folder as the vault.
+2. Edit content in `src/content/`.
+3. Use Obsidian Git to pull before starting work.
+4. Commit manually with a clear message.
+5. Push from Obsidian Git.
+6. GitHub Actions builds and deploys the site automatically after the push.
+
+Avoid committing generated or technical folders such as `node_modules/`, `dist/`, and `.astro/`. They are ignored by Git.
+
+## Obsidian Git Settings
+
+Recommended settings for the Obsidian Git plugin:
+
+- Pull on startup: enabled.
+- Pull before push: enabled.
+- Push after commit: enabled.
+- Commit method: manual commit preferred.
+- Auto-commit: disabled or set to a conservative interval.
+- Auto-push: avoid aggressive auto-push for public website content.
+
+This gives you a calm editorial workflow: write, review, commit, push, then let GitHub deploy.
+
+## Obsidian Vault Settings
+
+This project ignores `.obsidian/` by default so private workspace state, local plugin settings, open panes, and device-specific preferences do not get published to GitHub.
+
+If you later want to share a minimal Obsidian setup across machines, commit only deliberate files, for example:
+
+```txt
+.obsidian/community-plugins.json
+.obsidian/plugins/obsidian-git/
+```
+
+Do not commit workspace files, cache files, or settings containing private paths or tokens.
 
 ## Edit The Header, Footer, And Site Tree
 
@@ -294,12 +343,69 @@ The site uses the existing visual identity: warm paper, deep ink, subtle borders
 
 ## Production Deployment
 
-Build the site:
+Build the site locally:
 
 ```bash
 npm run build
 ```
 
-Deploy the generated `dist/` folder to any static host, such as Netlify, Vercel, Cloudflare Pages, GitHub Pages, or a traditional web server.
+GitHub Actions also builds the site on every push to `main`.
+
+The included workflow is:
+
+```txt
+.github/workflows/deploy.yml
+```
+
+It runs:
+
+```bash
+npm ci
+npm run build
+```
+
+If the Spaceship FTP secrets are configured in GitHub, it then uploads `dist/` to the server.
+
+Required GitHub repository secrets:
+
+```txt
+FTP_SERVER
+FTP_USERNAME
+FTP_PASSWORD
+FTP_TARGET_DIR
+```
+
+`FTP_TARGET_DIR` should be the correct folder for your domain on Spaceship hosting. Depending on the hosting setup, this may be `public_html/` or a domain-specific folder.
+
+Manual fallback:
+
+```bash
+npm run build
+```
+
+Then upload the contents of `dist/` to the correct folder in Spaceship.
 
 The production site is static HTML, CSS, and assets. No server runtime or database is required.
+
+## Troubleshooting
+
+### Obsidian sees too many technical files
+
+That is expected when opening the project root. Use Obsidian's file explorer carefully and edit only `src/content/`. You can also collapse technical folders such as `src/`, `public/`, `.github/`, and `node_modules/`. The important editable content is in `src/content/`.
+
+### Obsidian Git cannot find the repository
+
+Make sure the vault is the project root, not `src/content/`. The vault folder must contain the `.git/` directory.
+
+### GitHub Action does not run
+
+Confirm that you pushed to the `main` branch and that the workflow file exists at `.github/workflows/deploy.yml`. In GitHub, check the repository's Actions tab and make sure Actions are enabled.
+
+### Build fails after editing Markdown
+
+Most build failures come from invalid frontmatter. Check that YAML uses quotes around complex values, lists are indented correctly, dates are valid, and required fields are present. Run `npm run build` locally before pushing if you want to catch errors early.
+
+### Merge conflicts
+
+Pull before editing and before pushing. If two machines edit the same Markdown file, Obsidian Git may show a conflict. Resolve the conflict in the Markdown file, keep the version you want, then commit the resolved file.
+# aescuderweb
