@@ -1,0 +1,132 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Card from '../components/Card.astro';
+import CTA from '../components/CTA.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import TestimonialsCarousel from '../components/TestimonialsCarousel';
+
+const page = await getEntry('pages', 'teaching');
+if (!page) {
+  throw new Error('Missing teaching page content.');
+}
+
+const { Content } = await render(page);
+---
+
+<BaseLayout title={page.data.seoTitle ?? page.data.title} description={page.data.seoDescription ?? page.data.description}>
+  <Hero
+    eyebrow="Teaching"
+    title={page.data.heroTitle ?? page.data.title}
+    description={page.data.heroSubtitle ?? page.data.description}
+    image={page.data.heroImage}
+  />
+
+  <Section compact>
+    <div class="teaching-grid">
+      <article class="prose">
+        <Content />
+      </article>
+      <aside class="teaching-notes">
+        <Card
+          eyebrow="Experience"
+          title="Piano, theory, composition, technology."
+          description="My teaching experience includes conservatory contexts, private lessons, online courses, university-level music technology, and international student support across piano, harmony, composition, orchestration, mockups, synthesis, recording and acoustics."
+        >
+          <a href="/about">Read more about my career</a>
+        </Card>
+        <Card
+          eyebrow="NoSoloNotas"
+          title="Music beyond notation."
+          description="The teaching philosophy connects directly with NoSoloNotas: helping musicians understand sound, structure, listening, practice and meaning, not only written notes."
+        />
+      </aside>
+    </div>
+  </Section>
+
+  <Section eyebrow="Want to learn with me?" title="Online lessons" description="One-to-one online lessons are available for students who want focused, serious guidance.">
+    <div class="pricing-panel">
+      <article>
+        <p class="eyebrow">Standard session</p>
+        <h3>60 EUR / hour</h3>
+        <p>Piano, music theory, harmony, composition, music technology, orchestration, or orchestral MIDI mockups.</p>
+      </article>
+      <a class="button" data-variant="filled" href="/contact">Request a lesson</a>
+    </div>
+  </Section>
+
+  {
+    page.data.testimonials && page.data.testimonials.length > 0 && (
+      <Section eyebrow="Testimonials" title="What students say">
+        <TestimonialsCarousel items={page.data.testimonials} client:load />
+      </Section>
+    )
+  }
+
+  <CTA
+    eyebrow="Teaching inquiry"
+    title="Tell me what you are working toward."
+    description="Include your current level, goals, timeline, and the kind of support you are looking for."
+    href="/contact"
+    label="Write an inquiry"
+  />
+</BaseLayout>
+
+<style>
+  .teaching-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.8fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .teaching-notes {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .teaching-notes :global(a) {
+    color: var(--color-accent-blue);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .pricing-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xl);
+    border: 1px solid var(--color-border);
+    border-radius: 1.4rem;
+    background: var(--color-surface);
+    padding: var(--space-xl);
+  }
+
+  .pricing-panel article {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  .pricing-panel h3 {
+    font-size: 3.2rem;
+    font-style: italic;
+  }
+
+  .pricing-panel p:not(.eyebrow) {
+    max-width: 44rem;
+    color: var(--color-charcoal);
+  }
+
+  @media (max-width: 880px) {
+    .teaching-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pricing-panel {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

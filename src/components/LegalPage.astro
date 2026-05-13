@@ -1,0 +1,30 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={entry.data.seoTitle ?? entry.data.title} description={entry.data.seoDescription ?? entry.data.description}>
+  <main class="legal-page reading-container">
+    <p class="eyebrow">Legal</p>
+    <h1>{entry.data.title}</h1>
+    <p class="legal-page__description">{entry.data.description}</p>
+    <div class="prose">
+      <Content />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    display: grid;
+    gap: var(--space-md);
+    padding-block: var(--space-3xl);
+  }
+
+  .legal-page__description {
+    color: var(--color-charcoal);
+  }
+</style>

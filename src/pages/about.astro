@@ -1,0 +1,177 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AboutTimeline from '../components/AboutTimeline';
+import BioSwitcher from '../components/BioSwitcher';
+import CareerExplorer from '../components/CareerExplorer';
+import CTA from '../components/CTA.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+
+const page = await getEntry('pages', 'about');
+if (!page) {
+  throw new Error('Missing about page content.');
+}
+
+const { Content } = await render(page);
+---
+
+<BaseLayout title={page.data.seoTitle ?? page.data.title} description={page.data.seoDescription ?? page.data.description}>
+  <Hero
+    eyebrow={page.data.eyebrow ?? 'About'}
+    title={page.data.heroTitle ?? page.data.title}
+    description={page.data.heroSubtitle ?? page.data.description}
+    image={page.data.heroImage}
+  >
+    {
+      page.data.heroActions?.map((item, index) => (
+        <a
+          slot="actions"
+          class="button"
+          data-variant={item.variant === 'filled' || (!item.variant && index === 0) ? 'filled' : undefined}
+          href={item.href}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </Hero>
+
+  <Section id="biography" eyebrow="Choose the way to know my story" title="Bio" compact>
+    {
+      page.data.bioVersions ? (
+        <BioSwitcher bios={page.data.bioVersions} image={page.data.profileImage ?? '/images/profile-blue-closeup.png'} client:load />
+      ) : (
+        <article class="reading-container prose">
+          <Content />
+        </article>
+      )
+    }
+  </Section>
+
+  {
+    page.data.careerLines && page.data.careerLines.length > 0 && (
+      <Section id="career-lines" eyebrow="Career Lines" title="Professional profile" description="Open each line to explore the different branches of the work.">
+        <CareerExplorer lines={page.data.careerLines} client:load />
+      </Section>
+    )
+  }
+
+  {
+    page.data.missionValues && page.data.missionValues.length > 0 && (
+      <Section id="mission-values">
+        <div class="mission-values">
+          {page.data.missionValues.map((item) => (
+            <article>
+              <p class="eyebrow">{item.eyebrow}</p>
+              <h2>{item.title}</h2>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+    )
+  }
+
+  {
+    page.data.cvHighlights && page.data.cvHighlights.length > 0 && (
+      <Section id="cv" eyebrow="CV" title="Selected career profile" description="A compact version of the professional profile. Edit these cards from the About Markdown frontmatter.">
+        <div class="cv-grid">
+          {page.data.cvHighlights.map((item) => (
+            <article>
+              <p class="eyebrow">{item.label}</p>
+              <p>{item.value}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+    )
+  }
+
+  {
+    page.data.timeline && page.data.timeline.length > 0 && (
+      <Section id="timeline" eyebrow="Timeline" title="Training, works, and professional life" description="Click a date to read the detail. The timeline items also live in the About Markdown file.">
+        <AboutTimeline items={page.data.timeline} client:load />
+      </Section>
+    )
+  }
+
+  <CTA
+    eyebrow="Next"
+    title="Listen through the work."
+    description="Explore selected compositions, recordings, scores, and musical process notes."
+    href="/music"
+    label="Go to music"
+  />
+</BaseLayout>
+
+<style>
+  .cv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .cv-grid article {
+    display: grid;
+    align-content: start;
+    gap: var(--space-sm);
+    border-top: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.34);
+    padding-block-start: var(--space-md);
+  }
+
+  .cv-grid article p:not(.eyebrow) {
+    color: var(--color-charcoal);
+    line-height: 1.65;
+  }
+
+  #career-lines :global(.section__header h2),
+  #timeline :global(.section__header h2) {
+    font-size: clamp(2.4rem, 4vw, 3.8rem);
+  }
+
+  #career-lines {
+    background: rgba(255, 255, 255, 0.42);
+    margin-top: var(--space-3xl);
+    padding-block: var(--space-3xl);
+  }
+
+  #career-lines :global(.section__inner) {
+    gap: var(--space-lg);
+  }
+
+  .mission-values {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl);
+  }
+
+  .mission-values article {
+    display: grid;
+    align-content: start;
+    gap: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+  }
+
+  .mission-values h2 {
+    font-size: 3.55rem;
+  }
+
+  .mission-values p:not(.eyebrow) {
+    color: var(--color-charcoal);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 860px) {
+    .cv-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mission-values {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

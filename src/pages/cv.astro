@@ -1,0 +1,52 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CTA from '../components/CTA.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+
+const page = await getEntry('pages', 'cv');
+if (!page) {
+  throw new Error('Missing CV page content.');
+}
+
+const { Content } = await render(page);
+---
+
+<BaseLayout title={page.data.seoTitle ?? page.data.title} description={page.data.seoDescription ?? page.data.description}>
+  <Hero
+    eyebrow={page.data.eyebrow ?? 'CV'}
+    title={page.data.heroTitle ?? page.data.title}
+    description={page.data.heroSubtitle ?? page.data.description}
+    image={page.data.heroImage}
+  >
+    {
+      page.data.downloads?.map((item, index) => (
+        <a slot="actions" class="button" data-variant={index === 0 ? 'filled' : undefined} href={item.href} download>
+          {item.label}
+        </a>
+      ))
+    }
+  </Hero>
+
+  <Section compact>
+    <article class="reading-container prose cv-page">
+      <Content />
+    </article>
+  </Section>
+
+  <CTA
+    eyebrow="Contact"
+    title="Need a specific academic or project CV?"
+    description="For teaching, research, orchestration, or composition contexts, send the details of the opportunity."
+    href="/contact"
+    label="Contact"
+  />
+</BaseLayout>
+
+<style>
+  .cv-page h2 {
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+  }
+</style>

@@ -1,0 +1,9 @@
+---
+import { getEntry } from 'astro:content';
+import LegalPage from '../components/LegalPage.astro';
+
+const entry = await getEntry('pages', 'privacy');
+if (!entry) throw new Error('Missing privacy page content.');
+---
+
+<LegalPage entry={entry} />

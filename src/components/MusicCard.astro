@@ -1,0 +1,81 @@
+---
+interface Props {
+  item: {
+    data: {
+      title: string;
+      description: string;
+      year?: number | string;
+      type?: string;
+      coverImage?: string;
+      url?: string;
+    };
+  };
+}
+
+const { item } = Astro.props;
+const href = item.data.url;
+const Tag = href ? 'a' : 'article';
+const meta = [item.data.type, item.data.year].filter(Boolean).join(' · ');
+---
+
+<Tag class="music-card" href={href}>
+  {
+    item.data.coverImage && (
+      <img src={item.data.coverImage} alt="" loading="lazy" />
+    )
+  }
+  <div>
+    {meta && <p class="eyebrow">{meta}</p>}
+    <h3>{item.data.title}</h3>
+    <p>{item.data.description}</p>
+  </div>
+</Tag>
+
+<style>
+  .music-card {
+    display: grid;
+    grid-template-columns: minmax(7rem, 11rem) 1fr;
+    gap: var(--space-md);
+    align-items: start;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-ink);
+    padding-block: var(--space-lg);
+    text-decoration: none;
+  }
+
+  .music-card:hover h3 {
+    color: var(--color-accent-blue);
+  }
+
+  img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  div {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  h3 {
+    font-size: 2.25rem;
+  }
+
+  p:not(.eyebrow) {
+    max-width: 54rem;
+    color: var(--color-charcoal);
+  }
+
+  @media (max-width: 560px) {
+    .music-card {
+      grid-template-columns: 1fr;
+    }
+
+    img {
+      max-width: 12rem;
+    }
+  }
+</style>

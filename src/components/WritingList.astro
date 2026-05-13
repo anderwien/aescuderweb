@@ -1,0 +1,83 @@
+---
+import { formatDate } from '../lib/content';
+
+interface Props {
+  items: {
+    id: string;
+    data: {
+      title: string;
+      description: string;
+      date: Date;
+      tags?: string[];
+    };
+  }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="writing-list">
+  {
+    items.map((item) => (
+      <article class="writing-list__item">
+        <p class="eyebrow">{formatDate(item.data.date)}</p>
+        <h3><a href={`/writing/${item.id}/`}>{item.data.title}</a></h3>
+        <p>{item.data.description}</p>
+        {
+          item.data.tags && item.data.tags.length > 0 && (
+            <ul aria-label="Writing tags">
+              {item.data.tags.map((tag) => <li>{tag}</li>)}
+            </ul>
+          )
+        }
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .writing-list {
+    display: grid;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .writing-list__item {
+    display: grid;
+    gap: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+    padding-block: var(--space-lg);
+  }
+
+  h3 {
+    max-width: 850px;
+    font-size: 2.7rem;
+  }
+
+  h3 a {
+    text-decoration: none;
+  }
+
+  p:not(.eyebrow) {
+    max-width: 760px;
+    color: var(--color-charcoal);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 620px) {
+    h3 {
+      font-size: 2.1rem;
+    }
+  }
+</style>

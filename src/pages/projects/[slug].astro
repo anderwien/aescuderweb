@@ -1,0 +1,71 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CTA from '../../components/CTA.astro';
+import Hero from '../../components/Hero.astro';
+import Section from '../../components/Section.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project }
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const meta = [project.data.year, project.data.role].filter(Boolean).join(' · ');
+---
+
+<BaseLayout title={project.data.title} description={project.data.description}>
+  <Hero eyebrow={meta || 'Project'} title={project.data.title} description={project.data.description} image={project.data.coverImage} />
+
+  <Section compact>
+    <article class="project-detail reading-container">
+      {
+        project.data.tags && project.data.tags.length > 0 && (
+          <ul class="tags" aria-label="Project tags">
+            {project.data.tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+        )
+      }
+      <div class="prose">
+        <Content />
+      </div>
+      {project.data.url && <a class="button" href={project.data.url}>Visit project</a>}
+    </article>
+  </Section>
+
+  <CTA
+    eyebrow="More"
+    title="Explore the wider portfolio."
+    description="Return to the project archive for more work across music, education, and reflective practice."
+    href="/projects"
+    label="All projects"
+  />
+</BaseLayout>
+
+<style>
+  .project-detail {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .tags li {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0.5rem 0.68rem;
+  }
+</style>

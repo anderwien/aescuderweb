@@ -1,0 +1,9 @@
+---
+import { getEntry } from 'astro:content';
+import LegalPage from '../components/LegalPage.astro';
+
+const entry = await getEntry('pages', 'cookies');
+if (!entry) throw new Error('Missing cookies page content.');
+---
+
+<LegalPage entry={entry} />

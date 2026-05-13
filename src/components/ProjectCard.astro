@@ -1,0 +1,102 @@
+---
+interface Props {
+  project: {
+    id: string;
+    data: {
+      title: string;
+      description: string;
+      coverImage?: string;
+      year?: number | string;
+      role?: string;
+      tags?: string[];
+    };
+  };
+}
+
+const { project } = Astro.props;
+const meta = [project.data.year, project.data.role].filter(Boolean).join(' · ');
+---
+
+<article class="project-card">
+  {
+    project.data.coverImage && (
+      <a class="project-card__image" href={`/projects/${project.id}/`} aria-label={project.data.title}>
+        <img src={project.data.coverImage} alt="" loading="lazy" />
+      </a>
+    )
+  }
+  <div class="project-card__body">
+    {meta && <p class="eyebrow">{meta}</p>}
+    <h3><a href={`/projects/${project.id}/`}>{project.data.title}</a></h3>
+    <p>{project.data.description}</p>
+    {
+      project.data.tags && project.data.tags.length > 0 && (
+        <ul aria-label="Project tags">
+          {project.data.tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .project-card {
+    display: grid;
+    gap: var(--space-md);
+    min-width: 0;
+  }
+
+  .project-card__image {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-border);
+  }
+
+  .project-card__image img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: grayscale(1);
+    transition: filter 180ms ease, transform 180ms ease;
+  }
+
+  .project-card:hover img {
+    filter: grayscale(0.25);
+    transform: scale(1.015);
+  }
+
+  .project-card__body {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  h3 {
+    font-size: 2.2rem;
+  }
+
+  h3 a {
+    text-decoration: none;
+  }
+
+  p:not(.eyebrow) {
+    color: var(--color-charcoal);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    line-height: 1;
+    padding: 0.42rem 0.58rem;
+  }
+</style>

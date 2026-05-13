@@ -1,0 +1,146 @@
+---
+import { getEntry } from 'astro:content';
+import { site as fallbackSite } from '../lib/site';
+import FooterSocials from './FooterSocials';
+
+const settings = await getEntry('site', 'settings');
+const tree = await getEntry('site', 'tree');
+const brand = {
+  name: settings?.data.brandName ?? fallbackSite.name,
+  footerText: settings?.data.footerText ?? 'Pianist · Composer · Sociologist · Teacher · Music Technologist',
+  copyrightText: settings?.data.copyrightText ?? `© ${new Date().getFullYear()} ${settings?.data.brandName ?? fallbackSite.name}. All rights reserved.`
+};
+const navItems = [...(tree?.data.mainNav ?? [])].sort((a, b) => a.order - b.order);
+const socialLinks = (settings?.data.socialLinks ?? []).filter((link) => link.showInFooter !== false);
+const legalLinks = settings?.data.legalLinks ?? [];
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner wide-container">
+    <div class="site-footer__top">
+      <div class="site-footer__identity">
+        <p class="site-footer__name">{brand.name}</p>
+        <p class="site-footer__tagline">{brand.footerText}</p>
+        <p class="site-footer__copyright">{brand.copyrightText}</p>
+      </div>
+      <div class="site-footer__right">
+        <FooterSocials links={socialLinks} className="site-footer__socials" />
+        <nav aria-label="Footer navigation">
+          {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+        <nav class="site-footer__legal" aria-label="Legal navigation">
+          {legalLinks.map((item) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-night);
+    color: var(--color-paper);
+    margin-top: var(--space-3xl);
+    padding-block: var(--space-xl);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .site-footer__top {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
+    gap: var(--space-lg);
+  }
+
+  .site-footer__right {
+    display: grid;
+    justify-items: end;
+    gap: 0.65rem;
+  }
+
+  .site-footer__identity {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .site-footer__name {
+    font-family: var(--font-display);
+    font-size: 0.98rem;
+    line-height: 1;
+  }
+
+  .site-footer__tagline,
+  .site-footer__copyright {
+    color: rgba(236, 231, 225, 0.72);
+    font-size: 0.68rem;
+    line-height: 1.45;
+  }
+
+  :global(.site-footer__socials) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  :global(.site-footer__socials a) {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(236, 231, 225, 0.2);
+    border-radius: var(--radius-pill);
+    color: rgba(236, 231, 225, 0.78);
+    text-decoration: none;
+  }
+
+  :global(.site-footer__socials a:hover) {
+    border-color: var(--color-paper);
+    background: var(--color-paper);
+    color: var(--color-night);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.45rem 0.8rem;
+  }
+
+  nav a {
+    color: rgba(236, 231, 225, 0.66);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .site-footer__legal a {
+    font-size: 0.64rem;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    color: var(--color-paper);
+  }
+
+  @media (max-width: 720px) {
+    .site-footer__top {
+      grid-template-columns: 1fr;
+    }
+
+    .site-footer__right {
+      justify-items: start;
+    }
+
+    :global(.site-footer__socials),
+    nav {
+      justify-content: flex-start;
+    }
+  }
+</style>

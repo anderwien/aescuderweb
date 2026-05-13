@@ -1,0 +1,119 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  image?: string;
+  align?: 'left' | 'center';
+}
+
+const { eyebrow, title, description, image, align = 'left' } = Astro.props;
+const heroImage = image ?? '/images/composing.jpg';
+---
+
+<section
+  class:list={['hero', 'hero--image', `hero--${align}`]}
+  style={`--hero-image: url("${heroImage}");`}
+>
+  <div class="hero__inner container">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1>{title}</h1>
+    {description && <p class="hero__description">{description}</p>}
+    <div class="hero__actions">
+      <slot name="actions" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    min-height: 25.5rem;
+    align-items: end;
+    border-bottom: 1px solid var(--color-border);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .hero--image {
+    min-height: 31.5rem;
+    background:
+      linear-gradient(rgba(18, 26, 39, 0.62), rgba(18, 26, 39, 0.58)),
+      var(--hero-image) center / cover;
+  }
+
+  .hero__inner {
+    display: grid;
+    max-width: min(100%, 1180px);
+    gap: var(--space-md);
+  }
+
+  .hero--center .hero__inner {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .hero--image h1,
+  .hero--image .hero__description {
+    color: var(--color-surface);
+  }
+
+  .hero--image .eyebrow {
+    color: #b7d7e5;
+  }
+
+  h1 {
+    max-width: 18ch;
+  }
+
+  .hero--center h1 {
+    max-width: 18ch;
+  }
+
+  .hero__description {
+    max-width: 58rem;
+    color: var(--color-charcoal);
+    font-size: 1.28rem;
+    line-height: 1.55;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+  }
+
+  .hero__actions:empty {
+    display: none;
+  }
+
+  .hero--image :global(.button) {
+    border-color: rgba(255, 255, 255, 0.78);
+    color: var(--color-surface);
+  }
+
+  .hero--image :global(.button[data-variant="filled"]) {
+    border-color: var(--color-surface);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .hero--image :global(.button:hover),
+  .hero--image :global(.button[data-variant="filled"]:hover) {
+    border-color: var(--color-accent-blue);
+    background: var(--color-accent-blue);
+    color: var(--color-surface);
+  }
+
+  @media (max-width: 720px) {
+    .hero,
+    .hero--image {
+      min-height: 25rem;
+      padding-block: var(--space-xl);
+    }
+
+    .hero__description {
+      font-size: 1.08rem;
+    }
+  }
+</style>

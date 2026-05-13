@@ -1,0 +1,639 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import { ArrowDown } from 'lucide-react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CTA from '../components/CTA.astro';
+import FeaturedPlayer from '../components/FeaturedPlayer';
+import FooterSocials from '../components/FooterSocials';
+import HeroCarousel from '../components/HeroCarousel';
+import ProjectCard from '../components/ProjectCard.astro';
+import Section from '../components/Section.astro';
+import WritingTeasers from '../components/WritingTeasers.astro';
+import { byDateDesc, byOrder, isPublished } from '../lib/content';
+
+const home = await getEntry('pages', 'home');
+if (!home) {
+  throw new Error('Missing home page content.');
+}
+
+const { Content } = await render(home);
+const settings = await getEntry('site', 'settings');
+const featuredMusic = (await getCollection('music'))
+  .filter((item) => item.data.featured)
+  .sort(byOrder);
+const featuredProjects = (await getCollection('projects'))
+  .filter((project) => project.data.featured)
+  .sort(byOrder)
+  .slice(0, 2);
+const writing = (await getCollection('writing'))
+  .filter(isPublished)
+  .sort(byDateDesc)
+  .slice(0, 2);
+const heroImages = home.data.heroImages?.length
+  ? home.data.heroImages
+  : [home.data.heroImage ?? '/images/piano-portrait.jpg'];
+const heroActions = home.data.heroActions?.length
+  ? home.data.heroActions
+  : [
+      { label: home.data.primaryCtaLabel ?? 'Music', href: home.data.primaryCtaHref ?? '/music', variant: 'filled' },
+      { label: home.data.secondaryCtaLabel ?? 'Teaching', href: home.data.secondaryCtaHref ?? '/teaching', variant: 'outline' }
+    ];
+const socialLinks = (settings?.data.socialLinks ?? []).filter((link) => link.showInHero !== false);
+const heroSubtitleLines = (home.data.heroSubtitle ?? home.data.description)
+  .split(/\n+/)
+  .map((line) => line.trim())
+  .filter(Boolean);
+const featuredTracks = featuredMusic.map((item) => ({
+  id: item.id,
+  title: item.data.title,
+  description: item.data.description,
+  type: item.data.type,
+  category: item.data.category,
+  featuredGroup: item.data.featuredGroup,
+  duration: item.data.duration,
+  tags: item.data.tags,
+  coverImage: item.data.coverImage,
+  audioUrl: item.data.audioUrl
+}));
+---
+
+<BaseLayout title={home.data.seoTitle ?? home.data.title} description={home.data.seoDescription ?? home.data.description}>
+  <section class="home-hero">
+    <HeroCarousel images={heroImages} client:load />
+    <div class="home-hero__inner container">
+      <div class="home-hero__copy">
+        <h1>
+          {home.data.heroTitle ?? home.data.title}
+          {home.data.heroTitleAccent && <span>{home.data.heroTitleAccent}</span>}
+        </h1>
+        <p class="home-hero__lead">
+          <span class="home-hero__lead-main">{heroSubtitleLines[0]}</span>
+          {heroSubtitleLines.slice(1).map((line) => <span class="home-hero__lead-accent">{line}</span>)}
+        </p>
+        {home.data.heroActionsTitle && <p class="home-hero__prompt">{home.data.heroActionsTitle}</p>}
+        <div class="home-hero__actions">
+          {
+            heroActions.map((action, index) => (
+              <a class="button" data-variant={action.variant === 'filled' || (!action.variant && index === 0) ? 'filled' : undefined} href={action.href}>
+                {action.label}
+              </a>
+            ))
+          }
+        </div>
+        <FooterSocials links={socialLinks} className="home-hero__socials" label="Social and music links" />
+      </div>
+    </div>
+    <a class="home-hero__scroll" href="#about" aria-label="Jump to the next section">
+      <ArrowDown size={22} />
+    </a>
+  </section>
+
+  <section id="about" class="home-about-section">
+    <div class="home-about container">
+      <div class="home-about__copy">
+        <p class="eyebrow">About</p>
+        <h2>{home.data.aboutTitle ?? 'Pianist, composer, teacher.'}</h2>
+        <div class="prose">
+        <Content />
+        </div>
+        <a class="button" href={home.data.aboutCtaHref ?? '/about'}>{home.data.aboutCtaLabel ?? 'Read full biography'}</a>
+      </div>
+      <figure class="home-about__portrait">
+        <img src={home.data.aboutImage ?? '/images/piano-portrait.jpg'} alt="Alejandro Escuder portrait" />
+        {
+          home.data.aboutImageColor && (
+            <img class="home-about__portrait-color" src={home.data.aboutImageColor} alt="" aria-hidden="true" />
+          )
+        }
+      </figure>
+    </div>
+  </section>
+
+  <section id="featured-listening" class="playlist-section">
+    <div class="container">
+      <div class="playlist-panel">
+        <div class="playlist-panel__copy">
+          <p class="eyebrow">{home.data.playlistEyebrow ?? 'Featured'}</p>
+          <h2>{home.data.playlistTitle ?? 'Featured playlist'}</h2>
+          <p>{home.data.playlistDescription}</p>
+          <a class="button" data-variant="filled" href="/music#works">View all works</a>
+        </div>
+        <FeaturedPlayer tracks={featuredTracks} client:load />
+      </div>
+    </div>
+  </section>
+
+  <Section
+    id="projects"
+    eyebrow="Projects"
+    title="Education, research, and creative systems"
+    description="Projects that connect musical craft with learning, culture, and thoughtful public work."
+  >
+    <div class="project-grid">
+      {featuredProjects.map((project) => <ProjectCard project={project} />)}
+    </div>
+    <a class="button" href="/projects">View all projects</a>
+  </Section>
+
+  <section id="inspiration" class="writing-band">
+    <div class="container">
+      <header class="writing-band__header">
+        <p class="eyebrow">Writing</p>
+        <h2>Thought about Music, Technology, Education and Society</h2>
+      </header>
+      <WritingTeasers items={writing} />
+    </div>
+  </section>
+
+  <Section
+    id="education"
+    eyebrow="Teaching"
+    title="Musical understanding, not only instruction"
+    description="Teaching focused on sound, judgment, attention, and the habits that make musicians independent."
+  >
+    <div class="teaching-panel">
+      <article>
+        <h3>Lessons and coaching</h3>
+        <p>Thoughtful guidance in piano, interpretation, practice, composition, and musical thinking.</p>
+      </article>
+      <article>
+        <h3>Workshops and education</h3>
+        <p>Sessions around music literacy, practice design, listening, creative confidence, and NoSoloNotas.</p>
+      </article>
+    </div>
+    <a class="button" href="/teaching">Read teaching philosophy</a>
+  </Section>
+
+  <CTA
+    eyebrow="Contact"
+    title="Start a thoughtful conversation."
+    description="For teaching, collaborations, concerts, workshops, writing, and professional inquiries."
+    href="/contact"
+    label="Get in touch"
+  />
+</BaseLayout>
+
+<style>
+  .home-hero {
+    position: relative;
+    overflow: hidden;
+    min-height: calc(100vh - var(--header-height));
+    display: grid;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-night);
+    padding-block: var(--space-2xl);
+  }
+
+  .home-hero::after {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(18, 26, 39, 0.76) 0%, rgba(18, 26, 39, 0.52) 46%, rgba(18, 26, 39, 0.18) 100%),
+      linear-gradient(0deg, rgba(18, 26, 39, 0.38), rgba(18, 26, 39, 0.1));
+    content: "";
+    pointer-events: none;
+  }
+
+  .home-hero :global(.hero-carousel) {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .home-hero :global(.hero-carousel__slide) {
+    position: absolute;
+    inset: -4%;
+    background-position: center;
+    background-size: cover;
+    filter: grayscale(1);
+    opacity: 0;
+    animation: hero-drift 34s ease-in-out infinite alternate;
+    animation-delay: calc(var(--slide-index) * -7s);
+    transform: scale(1.04) translateX(-1%);
+    transition: opacity 1800ms ease;
+    will-change: opacity, transform;
+  }
+
+  .home-hero :global(.hero-carousel__slide--active) {
+    opacity: 1;
+  }
+
+  @keyframes hero-drift {
+    from {
+      transform: scale(1.04) translateX(-1%);
+    }
+
+    to {
+      transform: scale(1.1) translateX(1%);
+    }
+  }
+
+  .home-hero__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .home-hero__copy {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-md);
+    width: min(100%, 58rem);
+  }
+
+  .home-hero h1 {
+    max-width: 16ch;
+    color: var(--color-surface);
+    font-size: clamp(3.05rem, 5.4vw, 5.35rem);
+    line-height: 0.9;
+  }
+
+  .home-hero h1 span {
+    display: block;
+    font-style: italic;
+  }
+
+  .home-hero__lead {
+    max-width: 48rem;
+    color: rgba(255, 255, 255, 0.86);
+    display: grid;
+    gap: 0.55rem;
+    font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.18;
+  }
+
+  .home-hero__lead-main {
+    display: block;
+  }
+
+  .home-hero__lead-accent {
+    display: block;
+    font-family: "Cormorant Garamond", var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.08;
+  }
+
+  .home-hero__prompt {
+    margin-top: var(--space-xl);
+    margin-bottom: -0.55rem;
+    color: var(--color-surface);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.65rem;
+    margin-top: 0;
+  }
+
+  .home-hero :global(.button) {
+    border-color: rgba(255, 255, 255, 0.78);
+    color: var(--color-surface);
+    text-transform: none !important;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .home-hero__actions :global(.button) {
+    text-transform: none !important;
+  }
+
+  .home-hero :global(.button[data-variant="filled"]) {
+    border-color: var(--color-surface);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .home-hero :global(.button:hover) {
+    border-color: var(--color-accent-blue);
+    background: var(--color-accent-blue);
+    color: var(--color-surface);
+    transform: translateY(-2px);
+  }
+
+  .home-hero .eyebrow {
+    color: #b7d7e5;
+    font-size: 0.92rem;
+  }
+
+  .home-hero :global(.home-hero__socials) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 0.35rem;
+  }
+
+  .home-hero :global(.home-hero__socials a) {
+    display: inline-flex;
+    width: 2.35rem;
+    height: 2.35rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    border-radius: var(--radius-pill);
+    color: rgba(255, 255, 255, 0.84);
+    text-decoration: none;
+  }
+
+  .home-hero :global(.home-hero__socials a:hover) {
+    border-color: var(--color-surface);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .home-hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: var(--space-lg);
+    z-index: 3;
+    display: inline-flex;
+    width: 3.6rem;
+    height: 3.6rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-surface);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 0 16px 45px rgba(18, 26, 39, 0.24);
+    text-decoration: none;
+    transform: translateX(-50%);
+    animation: hero-bounce 1.65s ease-in-out infinite;
+  }
+
+  .home-hero__scroll:hover {
+    border-color: var(--color-surface);
+    background: var(--color-accent-blue);
+    color: var(--color-surface);
+  }
+
+  @keyframes hero-bounce {
+    0%,
+    100% {
+      transform: translate(-50%, 0);
+    }
+
+    50% {
+      transform: translate(-50%, 0.5rem);
+    }
+  }
+
+  .home-about-section {
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+    padding-block: var(--space-3xl);
+  }
+
+  .home-about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.82fr);
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .home-about__copy {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .home-about__copy h2 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .home-about__description {
+    max-width: 46rem;
+    color: var(--color-charcoal);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .home-about__description strong,
+  .home-about .prose strong {
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+
+  .home-about .prose {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .home-about .button {
+    width: fit-content;
+  }
+
+  .home-about__portrait {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 1.4rem;
+    background: var(--color-surface);
+    padding: 0.55rem;
+    box-shadow: 0 18px 55px rgba(18, 26, 39, 0.08);
+  }
+
+  .home-about__portrait img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 1rem;
+    filter: grayscale(1);
+    object-fit: cover;
+    transition: filter 500ms ease, opacity 500ms ease;
+  }
+
+  .home-about__portrait-color {
+    position: absolute;
+    inset: 0.55rem;
+    width: calc(100% - 1.1rem) !important;
+    height: calc(100% - 1.1rem);
+    opacity: 0;
+    filter: none !important;
+  }
+
+  .home-about__portrait:hover > img:first-child {
+    opacity: 0;
+  }
+
+  .home-about__portrait:hover .home-about__portrait-color {
+    opacity: 1;
+  }
+
+  .playlist-section {
+    background: var(--color-surface);
+    padding-block: var(--space-3xl);
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+
+  .playlist-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--space-xl);
+    align-items: stretch;
+    border: 1px solid var(--color-border);
+    border-radius: 2rem;
+    background: var(--color-paper);
+    padding: var(--space-xl);
+  }
+
+  .playlist-panel__copy {
+    display: grid;
+    align-content: start;
+    gap: var(--space-md);
+  }
+
+  .playlist-panel__copy h2 {
+    font-style: italic;
+  }
+
+  .playlist-panel__copy p:not(.eyebrow) {
+    color: var(--color-charcoal);
+    font-size: 1rem;
+    max-width: 36rem;
+  }
+
+  .playlist-panel__copy .button {
+    width: fit-content;
+  }
+
+  .playlist-panel__tracks {
+    display: grid;
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-border);
+  }
+
+  .playlist-panel__tracks article {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: var(--space-xs) var(--space-md);
+    background: rgba(255, 255, 255, 0.62);
+    padding: var(--space-md);
+  }
+
+  .playlist-panel__tracks span {
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-style: italic;
+    line-height: 1;
+    grid-row: span 2;
+  }
+
+  .playlist-panel__tracks strong {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .playlist-panel__tracks small {
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl);
+  }
+
+  .writing-band {
+    border-block: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.42);
+    margin-top: var(--space-3xl);
+    padding-block: var(--space-3xl);
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+
+  .writing-band__header {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: center;
+    margin-bottom: var(--space-2xl);
+    text-align: center;
+  }
+
+  .writing-band__header h2 {
+    font-style: italic;
+  }
+
+  .teaching-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .teaching-panel article {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+  }
+
+  .teaching-panel h3 {
+    font-size: 2.6rem;
+  }
+
+  .teaching-panel p {
+    color: var(--color-charcoal);
+    max-width: 34rem;
+  }
+
+  @media (max-width: 960px) {
+    .home-hero__inner,
+    .home-about,
+    .playlist-panel,
+    .project-grid,
+    .teaching-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .home-hero h1 {
+      font-size: 3.45rem;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .home-hero {
+      min-height: auto;
+      padding-block: var(--space-xl) var(--space-2xl);
+    }
+
+    .home-hero__inner {
+      gap: var(--space-xl);
+    }
+
+    .home-hero h1 {
+      max-width: 100%;
+      font-size: 2.36rem;
+    }
+
+    .home-hero__lead {
+      font-size: 1rem;
+    }
+
+    .writing-band__header h2 {
+      font-size: 3.4rem;
+    }
+  }
+</style>

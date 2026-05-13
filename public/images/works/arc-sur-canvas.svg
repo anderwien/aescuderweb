@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#203d4d"/>
+      <stop offset="1" stop-color="#ece7e1"/>
+    </linearGradient>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 0.18"/></feComponentTransfer></filter>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#g)"/>
+  <rect width="1200" height="1200" filter="url(#grain)" opacity="0.45"/>
+  <g fill="none" stroke="#ece7e1" stroke-width="5" opacity="0.72">
+    <path d="M110 760 C 260 610, 350 910, 500 720 S 780 520, 1090 700"/>
+    <path d="M120 830 C 350 640, 420 980, 650 740 S 820 610, 1080 800" opacity="0.55"/>
+    <path d="M150 430 H1050 M150 500 H1050 M150 570 H1050 M150 640 H1050" opacity="0.32"/>
+  </g>
+  <circle cx="910" cy="245" r="165" fill="#ece7e1" opacity="0.16"/>
+  <circle cx="330" cy="880" r="220" fill="#15151c" opacity="0.15"/>
+  <text x="95" y="175" fill="#ece7e1" font-family="Georgia, serif" font-size="88" font-style="italic">Arc sur canvas</text>
+  <text x="98" y="245" fill="#ece7e1" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="700" letter-spacing="6">CELLO + ELECTRONICS</text>
+</svg>

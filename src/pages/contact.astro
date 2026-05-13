@@ -1,0 +1,37 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import { site } from '../lib/site';
+
+const page = await getEntry('pages', 'contact');
+if (!page) {
+  throw new Error('Missing contact page content.');
+}
+
+const { Content } = await render(page);
+---
+
+<BaseLayout title={page.data.seoTitle ?? page.data.title} description={page.data.seoDescription ?? page.data.description}>
+  <Hero eyebrow="Contact" title="Professional inquiries and thoughtful messages." description={page.data.description}>
+    <a slot="actions" class="button" data-variant="filled" href={`mailto:${site.email}`}>Email Alejandro</a>
+  </Hero>
+
+  <Section compact>
+    <div class="contact-panel reading-container">
+      <article class="prose">
+        <Content />
+      </article>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .contact-panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.34);
+    padding: var(--space-xl);
+  }
+</style>

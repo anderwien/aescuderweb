@@ -1,0 +1,39 @@
+---
+import { getEntry } from 'astro:content';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { site } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const settings = await getEntry('site', 'settings');
+const siteName = settings?.data.brandName ?? site.name;
+const siteDescription = settings?.data.brandTagline ?? site.description;
+const title = Astro.props.title
+  ? `${Astro.props.title} | ${siteName}`
+  : `${siteName} | ${siteDescription}`;
+const description = Astro.props.description ?? siteDescription;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="icon" href="/images/ae-monogram-light.png" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <SiteHeader />
+      <slot />
+      <SiteFooter />
+    </div>
+  </body>
+</html>
