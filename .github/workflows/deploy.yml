@@ -39,5 +39,7 @@ jobs:
           server: ${{ env.FTP_SERVER }}
           username: ${{ env.FTP_USERNAME }}
           password: ${{ env.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
           local-dir: ./dist/
           server-dir: ${{ env.FTP_TARGET_DIR }}
