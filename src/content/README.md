@@ -1,6 +1,12 @@
-# Content Vault
+# Website Content
 
-Open this `src/content/` folder in Obsidian to edit the website content.
+Edit website content in this folder, but open the project root as the Obsidian vault:
+
+```txt
+<project-root>
+```
+
+Opening the root lets the Obsidian Git plugin find the `.git/` repository and push changes to GitHub. The root is the folder that contains `package.json`, `.git/`, `src/`, and `.github/`. Treat this `src/content/` folder as the editorial area of the vault.
 
 Collections:
 

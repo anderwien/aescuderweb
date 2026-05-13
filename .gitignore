@@ -3,3 +3,6 @@ dist/
 .astro/
 .DS_Store
 npm-debug.log*
+
+# Local Obsidian vault settings. Keep website content in Git, not private UI state.
+.obsidian/
